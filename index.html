@@ -5,7 +5,7 @@
 
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Attendance</title>
+<title>Employee Attendance</title>
 
 <style>
 
@@ -21,35 +21,44 @@ height:100vh;
 }
 
 .container{
+
 width:100%;
 max-width:420px;
-text-align:center;
 padding:20px;
+text-align:center;
+
 }
 
 select{
+
 width:100%;
 padding:12px;
 margin-top:10px;
 border-radius:8px;
-font-size:16px;
 border:none;
+font-size:16px;
+
 }
 
 video{
+
 width:100%;
 margin-top:15px;
 border-radius:10px;
+
 }
 
 #preview{
+
 width:100%;
 margin-top:10px;
 border-radius:10px;
 display:none;
+
 }
 
 button{
+
 width:100%;
 padding:14px;
 margin-top:15px;
@@ -59,13 +68,17 @@ background:#22c55e;
 color:white;
 font-size:16px;
 cursor:pointer;
+
 }
 
 .status{
+
 margin-top:10px;
+
 }
 
 #result{
+
 position:fixed;
 top:0;
 left:0;
@@ -78,6 +91,7 @@ align-items:center;
 text-align:center;
 font-size:30px;
 padding:20px;
+
 }
 
 </style>
@@ -106,8 +120,10 @@ padding:20px;
 
 </select>
 
-<div id="locationStatus" class="status">
+<div class="status" id="locationStatus">
+
 Checking location...
+
 </div>
 
 <video id="video" autoplay playsinline></video>
@@ -125,44 +141,59 @@ Checking location...
 <div id="result"></div>
 
 <script>
+
 const OFFICE_LAT = 23.2334625;
 const OFFICE_LON = 87.8657838;
 const RADIUS = 300;
 
+let imageData="";
+let locationApproved=false;
+
+const video=document.getElementById("video");
+
+navigator.mediaDevices.getUserMedia({
+video:{facingMode:"user"}
+})
+.then(stream=>{
+video.srcObject=stream;
+})
+.catch(()=>{
+alert("Camera permission denied");
+});
+
 navigator.geolocation.getCurrentPosition(function(pos){
 
-let lat = pos.coords.latitude;
-let lon = pos.coords.longitude;
+let lat=pos.coords.latitude;
+let lon=pos.coords.longitude;
 
-let dist = getDistance(lat, lon, OFFICE_LAT, OFFICE_LON);
+let dist=getDistance(lat,lon,OFFICE_LAT,OFFICE_LON);
 
-if(dist < RADIUS){
+if(dist<RADIUS){
 
-document.getElementById("locationStatus").innerHTML = "Location Approved";
-locationApproved = true;
+document.getElementById("locationStatus").innerHTML="Location Approved";
+locationApproved=true;
 
 }else{
 
-document.getElementById("locationStatus").innerHTML = "Location Invalid";
+document.getElementById("locationStatus").innerHTML="Location Invalid";
 
 }
 
 });
 
+function getDistance(lat1,lon1,lat2,lon2){
 
-function getDistance(lat1, lon1, lat2, lon2){
+var R=6371000;
 
-var R = 6371000;
+var dLat=(lat2-lat1)*Math.PI/180;
+var dLon=(lon2-lon1)*Math.PI/180;
 
-var dLat = (lat2-lat1) * Math.PI/180;
-var dLon = (lon2-lon1) * Math.PI/180;
-
-var a =
+var a=
 Math.sin(dLat/2)*Math.sin(dLat/2)+
 Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
 Math.sin(dLon/2)*Math.sin(dLon/2);
 
-var c = 2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+var c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 
 return R*c;
 
@@ -170,7 +201,7 @@ return R*c;
 
 function capture(){
 
-let canvas=document.getElementById("canvas");
+const canvas=document.getElementById("canvas");
 
 canvas.width=video.videoWidth;
 canvas.height=video.videoHeight;
