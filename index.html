@@ -51,7 +51,6 @@ display:none;
 }
 
 .overlay{
-
 position:fixed;
 top:0;
 left:0;
@@ -65,7 +64,7 @@ text-align:center;
 font-size:28px;
 font-weight:bold;
 z-index:999;
-
+padding:20px;
 }
 
 </style>
@@ -123,7 +122,6 @@ z-index:999;
 
 </div>
 
-<!-- FULL SCREEN MESSAGE -->
 <div id="resultScreen" class="overlay"></div>
 
 <script>
@@ -141,10 +139,17 @@ startCamera()
 function startCamera(){
 
 navigator.mediaDevices.getUserMedia({video:true})
+
 .then(function(s){
 
 stream=s
 document.getElementById("video").srcObject=s
+
+})
+
+.catch(function(){
+
+alert("Camera permission denied")
 
 })
 
@@ -171,6 +176,12 @@ document.getElementById("locStatus").innerHTML="✔ Location Verified"
 document.getElementById("locStatus").innerHTML="❌ Outside Office"
 
 }
+
+},
+
+function(){
+
+alert("Location permission denied")
 
 }
 
@@ -250,7 +261,7 @@ return
 
 }
 
-fetch("https://script.google.com/macros/s/AKfycbyL8Jv-4JuJ3NWDxlumSDMtt3VUa-zvnnb9Og5XCsUhqCybLKa3PW6SsmFsO-hS6pp6/exec",{
+fetch("https://script.google.com/macros/s/AKfycbz6QCPQMNPZpWn4_rYyrDLAO5vJMBAvNmZjzgrbYj87mwYCWtU3Gp1Soe77bOvvGJ79/exec",{
 
 method:"POST",
 
@@ -258,7 +269,7 @@ body:JSON.stringify({
 
 name:name,
 type:action,
-selfie:imageData
+image:imageData
 
 })
 
@@ -272,15 +283,17 @@ let screen=document.getElementById("resultScreen")
 
 screen.style.display="flex"
 
-if(res.includes("already")){
+if(res.toLowerCase().includes("already")){
 
 screen.innerHTML="🚫 Your attendance already submitted"
 
 }else{
 
-screen.innerHTML="✅ "+name+"<br>Your attendance successfully submitted"
+screen.innerHTML="✅ "+name+"<br>Attendance Successfully Submitted"
 
 }
+
+stopCamera()
 
 })
 
@@ -289,6 +302,16 @@ screen.innerHTML="✅ "+name+"<br>Your attendance successfully submitted"
 alert("Submit failed")
 
 })
+
+}
+
+function stopCamera(){
+
+if(stream){
+
+stream.getTracks().forEach(track=>track.stop())
+
+}
 
 }
 
