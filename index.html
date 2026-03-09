@@ -125,48 +125,32 @@ Checking location...
 <div id="result"></div>
 
 <script>
-
-const OFFICE_LAT = 23.23347761189141;
-const OFFICE_LON =87.8657784009684;
-const RADIUS = 00;
-
-let imageData="";
-let locationApproved=false;
-
-const video=document.getElementById("video");
-
-navigator.mediaDevices.getUserMedia({
-video:{facingMode:"user"}
-})
-
-.then(stream=>{
-video.srcObject=stream;
-})
-.catch(()=>{
-alert("Camera permission denied");
-});
+const OFFICE_LAT = 23.2334625;
+const OFFICE_LON = 87.8657838;
+const RADIUS = 300;
 
 navigator.geolocation.getCurrentPosition(function(pos){
 
-let lat=pos.coords.latitude;
-let lon=pos.coords.longitude;
+let lat = pos.coords.latitude;
+let lon = pos.coords.longitude;
 
-let dist=getDistance(lat,lon,OFFICE_LAT,OFFICE_LON);
+let dist = getDistance(lat, lon, OFFICE_LAT, OFFICE_LON);
 
-if(dist<RADIUS){
+if(dist < RADIUS){
 
-document.getElementById("locationStatus").innerHTML="Location Approved";
-locationApproved=true;
+document.getElementById("locationStatus").innerHTML = "Location Approved";
+locationApproved = true;
 
 }else{
 
-document.getElementById("locationStatus").innerHTML="Location Invalid";
+document.getElementById("locationStatus").innerHTML = "Location Invalid";
 
 }
 
 });
 
-function getDistance(lat1,lon1,lat2,lon2){
+
+function getDistance(lat1, lon1, lat2, lon2){
 
 var R = 6371000;
 
