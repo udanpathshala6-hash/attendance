@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
 <title>Attendance System</title>
@@ -8,18 +9,25 @@
 
 body{
 font-family:Arial;
-background:#f2f2f2;
-text-align:center;
-padding:40px;
+background:#f4f6f9;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
 }
 
-.container{
+.box{
+
 background:white;
 padding:30px;
+width:360px;
 border-radius:10px;
-width:350px;
-margin:auto;
-box-shadow:0 0 10px rgba(0,0,0,0.2);
+box-shadow:0 0 15px rgba(0,0,0,0.2);
+
+}
+
+h2{
+text-align:center;
 }
 
 select,button{
@@ -27,39 +35,38 @@ select,button{
 width:100%;
 padding:10px;
 margin-top:10px;
-border-radius:5px;
-border:1px solid #ccc;
-font-size:16px;
+border-radius:6px;
+font-size:15px;
 
 }
 
 button{
 
-background:#4CAF50;
+background:#2ecc71;
+border:none;
 color:white;
-cursor:pointer;
-
-}
-
-button:hover{
-
-background:#45a049;
 
 }
 
 video{
 
 width:100%;
-border-radius:10px;
 margin-top:10px;
+border-radius:10px;
 
 }
 
 #preview{
 
-margin-top:10px;
 width:100%;
-border-radius:10px;
+margin-top:10px;
+
+}
+
+.status{
+
+margin-top:10px;
+font-size:14px;
 
 }
 
@@ -69,7 +76,7 @@ border-radius:10px;
 
 <body>
 
-<div class="container">
+<div class="box">
 
 <h2>Employee Attendance</h2>
 
@@ -97,26 +104,77 @@ border-radius:10px;
 
 <img id="preview">
 
-<button onclick="submitData()">Submit Attendance</button>
+<button onclick="submitAttendance()">Submit Attendance</button>
+
+<div class="status" id="status"></div>
 
 </div>
 
 <script>
 
-const video=document.getElementById("video");
+const OFFICE_LAT = 26.7271;
+const OFFICE_LON = 88.3953;
+const RADIUS = 200;
+
+let latitude=null;
+let longitude=null;
+let imageData="";
+
+const statusText=document.getElementById("status");
 
 navigator.mediaDevices.getUserMedia({video:true})
-.then(stream=>{
 
-video.srcObject=stream;
+.then(stream=>{
+document.getElementById("video").srcObject=stream;
+statusText.innerHTML="Camera Ready";
+})
+
+.catch(()=>{
+statusText.innerHTML="Camera permission denied";
+});
+
+navigator.geolocation.getCurrentPosition(function(pos){
+
+latitude=pos.coords.latitude;
+longitude=pos.coords.longitude;
+
+let dist = getDistance(latitude,longitude,OFFICE_LAT,OFFICE_LON);
+
+if(dist > RADIUS){
+
+alert("You are outside office location");
+statusText.innerHTML="Location Invalid";
+
+}else{
+
+statusText.innerHTML="Location Verified";
+
+}
 
 });
 
-var imageData="";
+function getDistance(lat1,lon1,lat2,lon2){
+
+var R = 6371000;
+
+var dLat = (lat2-lat1) * Math.PI/180;
+var dLon = (lon2-lon1) * Math.PI/180;
+
+var a =
+Math.sin(dLat/2)*Math.sin(dLat/2)+
+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+Math.sin(dLon/2)*Math.sin(dLon/2);
+
+var c = 2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+
+return R*c;
+
+}
 
 function capture(){
 
-const canvas=document.getElementById("canvas");
+let video=document.getElementById("video");
+let canvas=document.getElementById("canvas");
 
 canvas.width=video.videoWidth;
 canvas.height=video.videoHeight;
@@ -129,7 +187,14 @@ document.getElementById("preview").src=imageData;
 
 }
 
-function submitData(){
+function submitAttendance(){
+
+if(!imageData){
+
+alert("Capture selfie first");
+return;
+
+}
 
 var employee=document.getElementById("employee").value;
 var action=document.getElementById("action").value;
@@ -156,11 +221,16 @@ image:imageData
 })
 
 .then(res=>res.text())
-.then(data=>alert("Attendance Saved"))
+.then(data=>{
+
+alert("Attendance Submitted");
+
+});
 
 }
 
 </script>
 
 </body>
+
 </html>
