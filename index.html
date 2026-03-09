@@ -3,7 +3,6 @@
 <head>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <title>Attendance System</title>
 
 <style>
@@ -22,8 +21,6 @@ padding:20px;
 border-radius:10px;
 box-shadow:0 0 10px rgba(0,0,0,0.2);
 }
-
-h2{text-align:center;}
 
 select,button{
 width:100%;
@@ -53,10 +50,22 @@ border-radius:8px;
 display:none;
 }
 
-.status{
-margin-top:10px;
+.overlay{
+
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:white;
+display:none;
+justify-content:center;
+align-items:center;
 text-align:center;
+font-size:28px;
 font-weight:bold;
+z-index:999;
+
 }
 
 </style>
@@ -73,19 +82,19 @@ font-weight:bold;
 
 <option value="">Select Employee</option>
 
-<option>Sagar Bala</option>
-<option>Nikunja Ghosh</option>
-<option>Dipan</option>
-<option>Jhuma Das</option>
+<option value="Sagar Bala">Sagar Bala</option>
+<option value="Nikunja Ghosh">Nikunja Ghosh</option>
+<option value="Dipan">Dipan</option>
+<option value="Jhuma Das">Jhuma Das</option>
 
-<option>1</option>
-<option>2</option>
-<option>3</option>
-<option>4</option>
-<option>5</option>
-<option>6</option>
-<option>7</option>
-<option>8</option>
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
 
 </select>
 
@@ -93,20 +102,16 @@ font-weight:bold;
 
 <option value="">Select Action</option>
 
-<option>Entry</option>
-<option>Tiffin Exit</option>
-<option>Tiffin Entry</option>
-<option>Exit</option>
+<option value="entry">Entry</option>
+<option value="tiffin_exit">Tiffin Exit</option>
+<option value="tiffin_entry">Tiffin Entry</option>
+<option value="exit">Exit</option>
 
 </select>
 
 <button onclick="verifyLocation()">📍 Verify Location</button>
 
-<div id="locStatus" class="status">
-
-Location Not Verified
-
-</div>
+<div id="locStatus">Location Not Verified</div>
 
 <video id="video" autoplay playsinline></video>
 
@@ -116,14 +121,15 @@ Location Not Verified
 
 <button onclick="submitAttendance()">Submit Attendance</button>
 
-<div id="msg" class="status"></div>
-
 </div>
+
+<!-- FULL SCREEN MESSAGE -->
+<div id="resultScreen" class="overlay"></div>
 
 <script>
 
 const officeLat = 23.23347531928216
-const officeLon = 87.8657818187088 
+const officeLon = 87.8657818187088
 const allowedDistance = 200
 
 let verified=false
@@ -135,18 +141,10 @@ startCamera()
 function startCamera(){
 
 navigator.mediaDevices.getUserMedia({video:true})
-
 .then(function(s){
 
 stream=s
-
 document.getElementById("video").srcObject=s
-
-})
-
-.catch(function(){
-
-alert("Camera permission denied")
 
 })
 
@@ -166,7 +164,6 @@ let distance=getDistance(lat,lon,officeLat,officeLon)
 if(distance<allowedDistance){
 
 verified=true
-
 document.getElementById("locStatus").innerHTML="✔ Location Verified"
 
 }else{
@@ -175,15 +172,7 @@ document.getElementById("locStatus").innerHTML="❌ Outside Office"
 
 }
 
-},
-
-function(){
-
-alert("Location permission denied")
-
-},
-
-{enableHighAccuracy:true,timeout:5000}
+}
 
 )
 
@@ -236,7 +225,6 @@ let action=document.getElementById("action").value
 if(name==""){
 
 alert("Select Employee")
-
 return
 
 }
@@ -244,7 +232,6 @@ return
 if(action==""){
 
 alert("Select Action")
-
 return
 
 }
@@ -252,7 +239,6 @@ return
 if(!verified){
 
 alert("Verify Location First")
-
 return
 
 }
@@ -260,20 +246,19 @@ return
 if(imageData==""){
 
 alert("Capture Selfie First")
-
 return
 
 }
 
-fetch("https://script.google.com/macros/s/AKfycbyS6hHdT02Pm95lBp9yaGbgAyQnarlAYFewLhdpOVqhzJKgVzUls9l01paO1tqmZx5g/exec",{
+fetch("https://script.google.com/macros/s/AKfycbyL8Jv-4JuJ3NWDxlumSDMtt3VUa-zvnnb9Og5XCsUhqCybLKa3PW6SsmFsO-hS6pp6/exec",{
 
 method:"POST",
 
 body:JSON.stringify({
 
 name:name,
-action:action,
-image:imageData
+type:action,
+selfie:imageData
 
 })
 
@@ -283,13 +268,17 @@ image:imageData
 
 .then(res=>{
 
-document.getElementById("msg").innerHTML=
+let screen=document.getElementById("resultScreen")
 
-name + " Your attendance complete"
+screen.style.display="flex"
 
-if(stream){
+if(res.includes("already")){
 
-stream.getTracks().forEach(track=>track.stop())
+screen.innerHTML="🚫 Your attendance already submitted"
+
+}else{
+
+screen.innerHTML="✅ "+name+"<br>Your attendance successfully submitted"
 
 }
 
