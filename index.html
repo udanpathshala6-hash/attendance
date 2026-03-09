@@ -4,7 +4,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>QR Attendance</title>
+<title>QR Attendance System</title>
 
 <style>
 
@@ -47,7 +47,9 @@ margin-top:10px;
 border-radius:8px;
 }
 
-canvas{display:none;}
+canvas{
+display:none;
+}
 
 .status{
 margin-top:10px;
@@ -87,9 +89,9 @@ width:300px;
 
 <h3>Permission Required</h3>
 
-<p>Camera and Location access required</p>
+<p>Allow Camera and Location</p>
 
-<button id="allowBtn">Allow Permission</button>
+<button onclick="startPermissions()">Allow Permission</button>
 
 </div>
 
@@ -102,16 +104,27 @@ width:300px;
 <select id="name">
 
 <option value="">Select Employee</option>
+
 <option>Sagar Bala</option>
 <option>Nikunja Ghosh</option>
 <option>Dipan</option>
 <option>Jhuma Das</option>
+
+<option>1</option>
+<option>2</option>
+<option>3</option>
+<option>4</option>
+<option>5</option>
+<option>6</option>
+<option>7</option>
+<option>8</option>
 
 </select>
 
 <select id="action">
 
 <option value="">Select Action</option>
+
 <option>Entry</option>
 <option>Tiffin Exit</option>
 <option>Tiffin Entry</option>
@@ -119,7 +132,7 @@ width:300px;
 
 </select>
 
-<button id="verifyBtn">📍 Verify Location</button>
+<button onclick="verifyLocation()">📍 Verify Location</button>
 
 <div id="locStatus" class="status">
 Location Not Verified
@@ -127,11 +140,11 @@ Location Not Verified
 
 <video id="video" autoplay playsinline></video>
 
-<button id="selfieBtn">📷 Capture Selfie</button>
+<button onclick="captureSelfie()">📷 Capture Selfie</button>
 
 <canvas id="canvas"></canvas>
 
-<button id="submitBtn" disabled>
+<button onclick="submitAttendance()">
 Submit Attendance
 </button>
 
@@ -141,39 +154,38 @@ Submit Attendance
 
 <script>
 
-const officeLat=23.23347775561584
-const officeLon=87.86578514123353
-const allowedDistance=150
+const officeLat = 23.23347685971669
+const officeLon = 87.86578450091794
+const allowedDistance = 150
 
-let imageData=""
 let verified=false
+let imageData=""
 
-const popup=document.getElementById("popup")
-const allowBtn=document.getElementById("allowBtn")
-const video=document.getElementById("video")
-const verifyBtn=document.getElementById("verifyBtn")
-const selfieBtn=document.getElementById("selfieBtn")
-const submitBtn=document.getElementById("submitBtn")
+function startPermissions(){
 
-allowBtn.addEventListener("click",async function(){
+navigator.mediaDevices.getUserMedia({video:true})
 
-try{
+.then(function(stream){
 
-const stream=await navigator.mediaDevices.getUserMedia({video:true})
+document.getElementById("video").srcObject=stream
 
-video.srcObject=stream
-
-navigator.geolocation.getCurrentPosition(()=>{},()=>{})
-
-popup.style.display="none"
-
-}catch(e){
-
-alert("Permission denied")
-
-}
+document.getElementById("popup").style.display="none"
 
 })
+
+.catch(function(){
+
+alert("Camera permission denied")
+
+})
+
+navigator.geolocation.getCurrentPosition(function(){},function(){
+
+alert("Location permission denied")
+
+})
+
+}
 
 function getDistance(lat1,lon1,lat2,lon2){
 
@@ -194,7 +206,7 @@ return R*c*1000
 
 }
 
-verifyBtn.addEventListener("click",function(){
+function verifyLocation(){
 
 navigator.geolocation.getCurrentPosition(function(pos){
 
@@ -209,24 +221,19 @@ verified=true
 
 document.getElementById("locStatus").innerHTML="✔ Location Verified"
 
-submitBtn.disabled=false
-
 }else{
 
 document.getElementById("locStatus").innerHTML="❌ Outside Office"
 
 }
 
-},function(){
-
-alert("Location permission denied")
-
 })
 
-})
+}
 
-selfieBtn.addEventListener("click",function(){
+function captureSelfie(){
 
+let video=document.getElementById("video")
 let canvas=document.getElementById("canvas")
 
 canvas.width=video.videoWidth
@@ -238,16 +245,32 @@ imageData=canvas.toDataURL("image/png")
 
 alert("Selfie Captured")
 
-})
+}
 
-submitBtn.addEventListener("click",function(){
+function submitAttendance(){
 
 let name=document.getElementById("name").value
 let action=document.getElementById("action").value
 
-if(name==""||action==""){
+if(name==""){
 
-alert("Select employee and action")
+alert("Select Employee")
+
+return
+
+}
+
+if(action==""){
+
+alert("Select Action")
+
+return
+
+}
+
+if(!verified){
+
+alert("Verify Location First")
 
 return
 
@@ -255,35 +278,37 @@ return
 
 if(imageData==""){
 
-alert("Capture selfie first")
+alert("Capture Selfie First")
 
 return
 
 }
 
-fetch("https://script.google.com/macros/s/AKfycbyKzS69m-xB4tEjIJu7gWBKS1nfk_ZZukxhTXm_SRZQvjNWRDkK3Euru-YjdaNTqf7H/exec",{
+fetch("https://script.google.com/macros/s/AKfycbxuVgg2RgGq9kKcuHCZlvRXFi2kYSY7SiKfSJYXV0HIJmZbZuYAcG74i7yZaOtnrqM/exec",{
 
 method:"POST",
 
 body:JSON.stringify({
 
 name:name,
-
 action:action,
-
 image:imageData
 
 })
 
 })
+
 .then(res=>res.text())
+
 .then(res=>{
 
-document.getElementById("msg").innerHTML="✔ Attendance Submitted"
+document.getElementById("msg").innerHTML=
+
+name + " Your attendance complete"
 
 })
 
-})
+}
 
 </script>
 
