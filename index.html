@@ -2,31 +2,65 @@
 <html>
 <head>
 
-<title>Attendance</title>
+<title>Attendance System</title>
 
 <style>
 
 body{
 font-family:Arial;
+background:#f2f2f2;
 text-align:center;
-margin-top:40px;
+padding:40px;
 }
 
-video{
-width:300px;
+.container{
+background:white;
+padding:30px;
 border-radius:10px;
+width:350px;
+margin:auto;
+box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+select,button{
+
+width:100%;
+padding:10px;
+margin-top:10px;
+border-radius:5px;
+border:1px solid #ccc;
+font-size:16px;
+
 }
 
 button{
-padding:10px 20px;
-margin-top:10px;
-font-size:16px;
+
+background:#4CAF50;
+color:white;
+cursor:pointer;
+
 }
 
-#msg{
-margin-top:20px;
-font-size:18px;
-font-weight:bold;
+button:hover{
+
+background:#45a049;
+
+}
+
+video{
+
+width:100%;
+border-radius:10px;
+margin-top:10px;
+
+}
+
+#preview{
+
+margin-top:10px;
+width:100%;
+border-radius:10px;
+
 }
 
 </style>
@@ -35,81 +69,94 @@ font-weight:bold;
 
 <body>
 
+<div class="container">
+
 <h2>Employee Attendance</h2>
 
-<select id="emp">
+<select id="employee">
+
 <option>Sagar Bala</option>
 <option>Nikunja Ghosh</option>
-<option>Dipan</option>
-<option>Jhuma Das</option>
-</select>
 
-<br><br>
+</select>
 
 <select id="action">
-<option value="entry">Entry</option>
-<option value="tiffin_exit">Tiffin Exit</option>
-<option value="tiffin_entry">Tiffin Entry</option>
-<option value="exit">Exit</option>
-</select>
 
-<br><br>
+<option>Entry</option>
+<option>Tiffin Exit</option>
+<option>Tiffin Entry</option>
+<option>Exit</option>
+
+</select>
 
 <video id="video" autoplay></video>
 
-<br>
+<button onclick="capture()">Capture Selfie</button>
 
-<button onclick="submitData()">Submit</button>
+<canvas id="canvas" style="display:none"></canvas>
 
-<p id="msg"></p>
+<img id="preview">
+
+<button onclick="submitData()">Submit Attendance</button>
+
+</div>
 
 <script>
 
-const scriptURL = "https://script.google.com/macros/s/AKfycbx4xEZjcom0ufZQZnHDQP-6zBs7oJfUNIehb9gO-6utuZn5MUtaScu2rPIGNUzPoptc/exec";
-
-const video = document.getElementById("video");
+const video=document.getElementById("video");
 
 navigator.mediaDevices.getUserMedia({video:true})
 .then(stream=>{
-video.srcObject = stream;
+
+video.srcObject=stream;
+
 });
+
+var imageData="";
+
+function capture(){
+
+const canvas=document.getElementById("canvas");
+
+canvas.width=video.videoWidth;
+canvas.height=video.videoHeight;
+
+canvas.getContext("2d").drawImage(video,0,0);
+
+imageData=canvas.toDataURL("image/png");
+
+document.getElementById("preview").src=imageData;
+
+}
 
 function submitData(){
 
-var emp = document.getElementById("emp").value;
-var action = document.getElementById("action").value;
+var employee=document.getElementById("employee").value;
+var action=document.getElementById("action").value;
 
-var canvas = document.createElement("canvas");
-canvas.width = video.videoWidth;
-canvas.height = video.videoHeight;
+var now=new Date();
 
-var ctx = canvas.getContext("2d");
-ctx.drawImage(video,0,0);
+var time=now.toLocaleTimeString();
+var date=now.toISOString().split('T')[0];
 
-var image = canvas.toDataURL("image/jpeg");
+fetch("https://script.google.com/macros/s/AKfycbxZGo1168etcOG8aVu8gTT-F7f5WFihF4db2H_4CgOOKJB8UVF24EazZsali8gzF3b4/exec",{
 
-var formData = new FormData();
-formData.append("emp",emp);
-formData.append("action",action);
-formData.append("image",image);
-
-fetch(scriptURL,{
 method:"POST",
-body:formData
+
+body:new URLSearchParams({
+
+employee:employee,
+action:action,
+time:time,
+date:date,
+image:imageData
+
 })
+
+})
+
 .then(res=>res.text())
-.then(data=>{
-
-document.getElementById("msg").innerHTML =
-"✅ Your attendance successfully submitted";
-
-})
-.catch(err=>{
-
-document.getElementById("msg").innerHTML =
-"❌ Submit Failed";
-
-});
+.then(data=>alert("Attendance Saved"))
 
 }
 
