@@ -4,13 +4,13 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>QR Attendance System</title>
+<title>Attendance System</title>
 
 <style>
 
 body{
 font-family:Arial;
-background:#f3f5f7;
+background:#f2f2f2;
 padding:20px;
 }
 
@@ -38,7 +38,6 @@ button{
 background:#007bff;
 color:white;
 border:none;
-cursor:pointer;
 }
 
 video{
@@ -47,34 +46,17 @@ margin-top:10px;
 border-radius:8px;
 }
 
-canvas{
+#preview{
+width:100%;
+margin-top:10px;
+border-radius:8px;
 display:none;
 }
 
 .status{
 margin-top:10px;
+text-align:center;
 font-weight:bold;
-text-align:center;
-}
-
-.popup{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.6);
-display:flex;
-align-items:center;
-justify-content:center;
-}
-
-.popup-box{
-background:white;
-padding:20px;
-border-radius:10px;
-text-align:center;
-width:300px;
 }
 
 </style>
@@ -82,20 +64,6 @@ width:300px;
 </head>
 
 <body>
-
-<div id="popup" class="popup">
-
-<div class="popup-box">
-
-<h3>Permission Required</h3>
-
-<p>Allow Camera and Location</p>
-
-<button onclick="startPermissions()">Allow Permission</button>
-
-</div>
-
-</div>
 
 <div class="container">
 
@@ -135,18 +103,18 @@ width:300px;
 <button onclick="verifyLocation()">📍 Verify Location</button>
 
 <div id="locStatus" class="status">
+
 Location Not Verified
+
 </div>
 
 <video id="video" autoplay playsinline></video>
 
+<img id="preview">
+
 <button onclick="captureSelfie()">📷 Capture Selfie</button>
 
-<canvas id="canvas"></canvas>
-
-<button onclick="submitAttendance()">
-Submit Attendance
-</button>
+<button onclick="submitAttendance()">Submit Attendance</button>
 
 <div id="msg" class="status"></div>
 
@@ -154,22 +122,25 @@ Submit Attendance
 
 <script>
 
-const officeLat = 23.23347685971669
-const officeLon = 87.86578450091794
-const allowedDistance = 150
+const officeLat = 23.23347531928216
+const officeLon = 87.8657818187088 
+const allowedDistance = 200
 
 let verified=false
 let imageData=""
+let stream=null
 
-function startPermissions(){
+startCamera()
+
+function startCamera(){
 
 navigator.mediaDevices.getUserMedia({video:true})
 
-.then(function(stream){
+.then(function(s){
 
-document.getElementById("video").srcObject=stream
+stream=s
 
-document.getElementById("popup").style.display="none"
+document.getElementById("video").srcObject=s
 
 })
 
@@ -179,11 +150,42 @@ alert("Camera permission denied")
 
 })
 
-navigator.geolocation.getCurrentPosition(function(){},function(){
+}
+
+function verifyLocation(){
+
+navigator.geolocation.getCurrentPosition(
+
+function(pos){
+
+let lat=pos.coords.latitude
+let lon=pos.coords.longitude
+
+let distance=getDistance(lat,lon,officeLat,officeLon)
+
+if(distance<allowedDistance){
+
+verified=true
+
+document.getElementById("locStatus").innerHTML="✔ Location Verified"
+
+}else{
+
+document.getElementById("locStatus").innerHTML="❌ Outside Office"
+
+}
+
+},
+
+function(){
 
 alert("Location permission denied")
 
-})
+},
+
+{enableHighAccuracy:true,timeout:5000}
+
+)
 
 }
 
@@ -206,35 +208,11 @@ return R*c*1000
 
 }
 
-function verifyLocation(){
-
-navigator.geolocation.getCurrentPosition(function(pos){
-
-let lat=pos.coords.latitude
-let lon=pos.coords.longitude
-
-let distance=getDistance(lat,lon,officeLat,officeLon)
-
-if(distance<allowedDistance){
-
-verified=true
-
-document.getElementById("locStatus").innerHTML="✔ Location Verified"
-
-}else{
-
-document.getElementById("locStatus").innerHTML="❌ Outside Office"
-
-}
-
-})
-
-}
-
 function captureSelfie(){
 
 let video=document.getElementById("video")
-let canvas=document.getElementById("canvas")
+
+let canvas=document.createElement("canvas")
 
 canvas.width=video.videoWidth
 canvas.height=video.videoHeight
@@ -243,7 +221,10 @@ canvas.getContext("2d").drawImage(video,0,0)
 
 imageData=canvas.toDataURL("image/png")
 
-alert("Selfie Captured")
+document.getElementById("preview").src=imageData
+document.getElementById("preview").style.display="block"
+
+video.style.display="none"
 
 }
 
@@ -305,6 +286,18 @@ image:imageData
 document.getElementById("msg").innerHTML=
 
 name + " Your attendance complete"
+
+if(stream){
+
+stream.getTracks().forEach(track=>track.stop())
+
+}
+
+})
+
+.catch(function(){
+
+alert("Submit failed")
 
 })
 
