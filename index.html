@@ -2,69 +2,23 @@
 <html>
 <head>
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Attendance System</title>
+<title>Attendance</title>
 
 <style>
 
 body{
 font-family:Arial;
-background:#f2f2f2;
-padding:20px;
-}
-
-.container{
-max-width:420px;
-background:white;
-margin:auto;
-padding:20px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.2);
-}
-
-select,button{
-width:100%;
-padding:12px;
-margin-top:10px;
-border-radius:6px;
-border:1px solid #ccc;
-font-size:16px;
+text-align:center;
 }
 
 button{
-background:#007bff;
-color:white;
-border:none;
+padding:10px;
+margin:5px;
 }
 
-video{
-width:100%;
-margin-top:10px;
-border-radius:8px;
-}
-
-#preview{
-width:100%;
-margin-top:10px;
-border-radius:8px;
-display:none;
-}
-
-.overlay{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:white;
-display:none;
-justify-content:center;
-align-items:center;
-text-align:center;
-font-size:28px;
-font-weight:bold;
-z-index:999;
-padding:20px;
+#msg{
+font-size:20px;
+margin-top:20px;
 }
 
 </style>
@@ -73,33 +27,20 @@ padding:20px;
 
 <body>
 
-<div class="container">
-
 <h2>Employee Attendance</h2>
 
-<select id="name">
+<select id="emp">
 
-<option value="">Select Employee</option>
-
-<option value="Sagar Bala">Sagar Bala</option>
-<option value="Nikunja Ghosh">Nikunja Ghosh</option>
-<option value="Dipan">Dipan</option>
-<option value="Jhuma Das">Jhuma Das</option>
-
-<option value="1">1</option>
-<option value="2">2</option>
-<option value="3">3</option>
-<option value="4">4</option>
-<option value="5">5</option>
-<option value="6">6</option>
-<option value="7">7</option>
-<option value="8">8</option>
+<option>Sagar Bala</option>
+<option>Nikunja Ghosh</option>
+<option>Dipan</option>
+<option>Jhuma Das</option>
 
 </select>
 
-<select id="action">
+<br><br>
 
-<option value="">Select Action</option>
+<select id="action">
 
 <option value="entry">Entry</option>
 <option value="tiffin_exit">Tiffin Exit</option>
@@ -108,214 +49,55 @@ padding:20px;
 
 </select>
 
-<button onclick="verifyLocation()">📍 Verify Location</button>
+<br><br>
 
-<div id="locStatus">Location Not Verified</div>
+<video id="video" width="300" autoplay></video>
 
-<video id="video" autoplay playsinline></video>
+<br><br>
 
-<img id="preview">
+<button onclick="capture()">Submit</button>
 
-<button onclick="captureSelfie()">📷 Capture Selfie</button>
-
-<button onclick="submitAttendance()">Submit Attendance</button>
-
-</div>
-
-<div id="resultScreen" class="overlay"></div>
+<p id="msg"></p>
 
 <script>
 
-const officeLat = 23.23347531928216
-const officeLon = 87.8657818187088
-const allowedDistance = 200
-
-let verified = false
-let imageData = ""
-let stream = null
-
-startCamera()
-
-function startCamera(){
+const scriptURL="https://script.google.com/macros/s/AKfycbz_H2vh5ytsooFy2EtkZorbzSD6Uad4N8uEYGtNvkL5vC5r_cVWpYj5wdO4HXP3fz3j/exec";
 
 navigator.mediaDevices.getUserMedia({video:true})
+.then(stream=>{
+document.getElementById("video").srcObject=stream;
+});
 
-.then(function(s){
+function capture(){
 
-stream = s
-document.getElementById("video").srcObject = s
+var emp=document.getElementById("emp").value;
+var action=document.getElementById("action").value;
 
-})
+var video=document.getElementById("video");
 
-.catch(function(){
+var canvas=document.createElement("canvas");
+canvas.width=video.videoWidth;
+canvas.height=video.videoHeight;
 
-alert("Camera permission denied")
+var ctx=canvas.getContext("2d");
+ctx.drawImage(video,0,0);
 
-})
+var image=canvas.toDataURL("image/jpeg");
 
-}
-
-function verifyLocation(){
-
-navigator.geolocation.getCurrentPosition(
-
-function(pos){
-
-let lat = pos.coords.latitude
-let lon = pos.coords.longitude
-
-let distance = getDistance(lat,lon,officeLat,officeLon)
-
-if(distance < allowedDistance){
-
-verified = true
-document.getElementById("locStatus").innerHTML = "✔ Location Verified"
-
-}else{
-
-document.getElementById("locStatus").innerHTML = "❌ Outside Office"
-
-}
-
-},
-
-function(){
-
-alert("Location permission denied")
-
-}
-
-)
-
-}
-
-function getDistance(lat1,lon1,lat2,lon2){
-
-const R = 6371
-
-const dLat = (lat2-lat1)*Math.PI/180
-const dLon = (lon2-lon1)*Math.PI/180
-
-const a =
-Math.sin(dLat/2)*Math.sin(dLat/2) +
-Math.cos(lat1*Math.PI/180) *
-Math.cos(lat2*Math.PI/180) *
-Math.sin(dLon/2)*Math.sin(dLon/2)
-
-const c = 2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))
-
-return R*c*1000
-
-}
-
-function captureSelfie(){
-
-let video = document.getElementById("video")
-
-let canvas = document.createElement("canvas")
-
-canvas.width = video.videoWidth
-canvas.height = video.videoHeight
-
-canvas.getContext("2d").drawImage(video,0,0)
-
-imageData = canvas.toDataURL("image/png")
-
-document.getElementById("preview").src = imageData
-document.getElementById("preview").style.display = "block"
-
-video.style.display = "none"
-
-}
-
-function submitAttendance(){
-
-let name = document.getElementById("name").value
-let action = document.getElementById("action").value
-
-if(name==""){
-
-alert("Select Employee")
-return
-
-}
-
-if(action==""){
-
-alert("Select Action")
-return
-
-}
-
-if(!verified){
-
-alert("Verify Location First")
-return
-
-}
-
-if(imageData==""){
-
-alert("Capture Selfie First")
-return
-
-}
-
-fetch("https://script.google.com/macros/s/AKfycbxaUvEZOXPSPkyz94tE1j4ZHMEvPORzhmLhLGI4g64hs4nNZWIKmC9101kkZ51D6YBY/exec",{
-
+fetch(scriptURL,{
 method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-
-name:name,
-type:action,
-image:imageData
-
+body:new URLSearchParams({
+emp:emp,
+action:action,
+image:image
 })
-
 })
+.then(res=>res.text())
+.then(data=>{
 
-.then(res => res.text())
+document.getElementById("msg").innerHTML="Your attendance successfully submitted";
 
-.then(res => {
-
-let screen = document.getElementById("resultScreen")
-
-screen.style.display = "flex"
-
-if(res.includes("already")){
-
-screen.innerHTML = "🚫 Your attendance already submitted"
-
-}else{
-
-screen.innerHTML = "✅ "+name+"<br>Attendance Successfully Submitted"
-
-}
-
-stopCamera()
-
-})
-
-.catch(function(){
-
-alert("Submit Failed")
-
-})
-
-}
-
-function stopCamera(){
-
-if(stream){
-
-stream.getTracks().forEach(track => track.stop())
-
-}
+});
 
 }
 
