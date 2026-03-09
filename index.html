@@ -5,7 +5,7 @@
 
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Attendance System</title>
+<title>Attendance</title>
 
 <style>
 
@@ -21,39 +21,35 @@ height:100vh;
 }
 
 .container{
-
 width:100%;
 max-width:420px;
 text-align:center;
 padding:20px;
-
-}
-
-h2{
-margin-bottom:15px;
 }
 
 select{
-
 width:100%;
 padding:12px;
 margin-top:10px;
 border-radius:8px;
 font-size:16px;
 border:none;
-
 }
 
 video{
-
 width:100%;
 margin-top:15px;
-border-radius:12px;
+border-radius:10px;
+}
 
+#preview{
+width:100%;
+margin-top:10px;
+border-radius:10px;
+display:none;
 }
 
 button{
-
 width:100%;
 padding:14px;
 margin-top:15px;
@@ -63,24 +59,13 @@ background:#22c55e;
 color:white;
 font-size:16px;
 cursor:pointer;
-
-}
-
-button:hover{
-
-background:#16a34a;
-
 }
 
 .status{
-
-margin-top:12px;
-font-size:15px;
-
+margin-top:10px;
 }
 
 #result{
-
 position:fixed;
 top:0;
 left:0;
@@ -91,9 +76,8 @@ display:none;
 justify-content:center;
 align-items:center;
 text-align:center;
-font-size:28px;
+font-size:30px;
 padding:20px;
-
 }
 
 </style>
@@ -122,11 +106,13 @@ padding:20px;
 
 </select>
 
-<div class="status" id="locationStatus">
+<div id="locationStatus" class="status">
 Checking location...
 </div>
 
 <video id="video" autoplay playsinline></video>
+
+<img id="preview">
 
 <button onclick="capture()">Capture Selfie</button>
 
@@ -140,9 +126,9 @@ Checking location...
 
 <script>
 
-const OFFICE_LAT = 23.233639618888493;
-const OFFICE_LON = 87.86573843314055;
-const RADIUS = 100;
+const OFFICE_LAT = 23.233703051552062;
+const OFFICE_LON = 87.86574516696813;
+const RADIUS = 00;
 
 let imageData="";
 let locationApproved=false;
@@ -153,18 +139,12 @@ navigator.mediaDevices.getUserMedia({
 video:{facingMode:"user"}
 })
 
-.then(function(stream){
-
+.then(stream=>{
 video.srcObject=stream;
-
 })
-
-.catch(function(){
-
+.catch(()=>{
 alert("Camera permission denied");
-
 });
-
 
 navigator.geolocation.getCurrentPosition(function(pos){
 
@@ -186,7 +166,6 @@ document.getElementById("locationStatus").innerHTML="Location Invalid";
 
 });
 
-
 function getDistance(lat1,lon1,lat2,lon2){
 
 var R = 6371000;
@@ -205,10 +184,9 @@ return R*c;
 
 }
 
-
 function capture(){
 
-const canvas=document.getElementById("canvas");
+let canvas=document.getElementById("canvas");
 
 canvas.width=video.videoWidth;
 canvas.height=video.videoHeight;
@@ -217,10 +195,12 @@ canvas.getContext("2d").drawImage(video,0,0);
 
 imageData=canvas.toDataURL("image/png");
 
-alert("Selfie captured");
+let preview=document.getElementById("preview");
+
+preview.src=imageData;
+preview.style.display="block";
 
 }
-
 
 function submitAttendance(){
 
@@ -267,7 +247,7 @@ image:imageData
 
 let result=document.getElementById("result");
 
-if(data=="ALREADY"){
+if(data.trim()=="ALREADY"){
 
 result.innerHTML=employee+"<br>Your action is already submitted";
 
