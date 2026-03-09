@@ -2,23 +2,46 @@
 <html>
 <head>
 
-<title>Attendance</title>
+<title>Employee Attendance</title>
 
 <style>
 
 body{
 font-family:Arial;
+background:#f2f2f2;
 text-align:center;
+padding:40px;
 }
 
-button{
+.container{
+background:white;
+padding:30px;
+border-radius:10px;
+width:350px;
+margin:auto;
+box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+h2{
+margin-bottom:20px;
+}
+
+select,button{
+width:100%;
 padding:10px;
-margin:5px;
+margin:10px 0;
+font-size:16px;
+}
+
+video{
+width:100%;
+border-radius:10px;
 }
 
 #msg{
-font-size:20px;
 margin-top:20px;
+font-size:18px;
+font-weight:bold;
 }
 
 </style>
@@ -27,7 +50,9 @@ margin-top:20px;
 
 <body>
 
-<h2>Employee Attendance</h2>
+<div class="container">
+
+<h2>Attendance System</h2>
 
 <select id="emp">
 
@@ -38,8 +63,6 @@ margin-top:20px;
 
 </select>
 
-<br><br>
-
 <select id="action">
 
 <option value="entry">Entry</option>
@@ -49,31 +72,29 @@ margin-top:20px;
 
 </select>
 
-<br><br>
+<video id="video" autoplay></video>
 
-<video id="video" width="300" autoplay></video>
+<button onclick="submitAttendance()">Submit Attendance</button>
 
-<br><br>
+<div id="msg"></div>
 
-<button onclick="capture()">Submit</button>
-
-<p id="msg"></p>
+</div>
 
 <script>
 
-const scriptURL="https://script.google.com/macros/s/AKfycbz_H2vh5ytsooFy2EtkZorbzSD6Uad4N8uEYGtNvkL5vC5r_cVWpYj5wdO4HXP3fz3j/exec";
+const scriptURL="https://script.google.com/macros/s/AKfycbzP0-GGlwVVAbsEpqvA62P-qUD3LvOYWBUJG9kLC_MXuTv5ngcYT5NKXa4Xe1cDBm2F/exec";
+
+const video=document.getElementById("video");
 
 navigator.mediaDevices.getUserMedia({video:true})
 .then(stream=>{
-document.getElementById("video").srcObject=stream;
+video.srcObject=stream;
 });
 
-function capture(){
+function submitAttendance(){
 
 var emp=document.getElementById("emp").value;
 var action=document.getElementById("action").value;
-
-var video=document.getElementById("video");
 
 var canvas=document.createElement("canvas");
 canvas.width=video.videoWidth;
@@ -95,7 +116,14 @@ image:image
 .then(res=>res.text())
 .then(data=>{
 
-document.getElementById("msg").innerHTML="Your attendance successfully submitted";
+document.getElementById("msg").innerHTML=
+"✅ Your attendance successfully submitted";
+
+})
+.catch(err=>{
+
+document.getElementById("msg").innerHTML=
+"❌ Submit failed";
 
 });
 
