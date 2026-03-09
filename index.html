@@ -2,40 +2,25 @@
 <html>
 <head>
 
-<title>Employee Attendance</title>
+<title>Attendance</title>
 
 <style>
 
 body{
 font-family:Arial;
-background:#f2f2f2;
 text-align:center;
-padding:40px;
-}
-
-.container{
-background:white;
-padding:30px;
-border-radius:10px;
-width:350px;
-margin:auto;
-box-shadow:0 0 10px rgba(0,0,0,0.2);
-}
-
-h2{
-margin-bottom:20px;
-}
-
-select,button{
-width:100%;
-padding:10px;
-margin:10px 0;
-font-size:16px;
+margin-top:40px;
 }
 
 video{
-width:100%;
+width:300px;
 border-radius:10px;
+}
+
+button{
+padding:10px 20px;
+margin-top:10px;
+font-size:16px;
 }
 
 #msg{
@@ -50,80 +35,79 @@ font-weight:bold;
 
 <body>
 
-<div class="container">
-
-<h2>Attendance System</h2>
+<h2>Employee Attendance</h2>
 
 <select id="emp">
-
 <option>Sagar Bala</option>
 <option>Nikunja Ghosh</option>
 <option>Dipan</option>
 <option>Jhuma Das</option>
-
 </select>
 
-<select id="action">
+<br><br>
 
+<select id="action">
 <option value="entry">Entry</option>
 <option value="tiffin_exit">Tiffin Exit</option>
 <option value="tiffin_entry">Tiffin Entry</option>
 <option value="exit">Exit</option>
-
 </select>
+
+<br><br>
 
 <video id="video" autoplay></video>
 
-<button onclick="submitAttendance()">Submit Attendance</button>
+<br>
 
-<div id="msg"></div>
+<button onclick="submitData()">Submit</button>
 
-</div>
+<p id="msg"></p>
 
 <script>
 
-const scriptURL="https://script.google.com/macros/s/AKfycbzP0-GGlwVVAbsEpqvA62P-qUD3LvOYWBUJG9kLC_MXuTv5ngcYT5NKXa4Xe1cDBm2F/exec";
+const scriptURL = "https://script.google.com/macros/s/AKfycbx4xEZjcom0ufZQZnHDQP-6zBs7oJfUNIehb9gO-6utuZn5MUtaScu2rPIGNUzPoptc/exec";
 
-const video=document.getElementById("video");
+const video = document.getElementById("video");
 
 navigator.mediaDevices.getUserMedia({video:true})
 .then(stream=>{
-video.srcObject=stream;
+video.srcObject = stream;
 });
 
-function submitAttendance(){
+function submitData(){
 
-var emp=document.getElementById("emp").value;
-var action=document.getElementById("action").value;
+var emp = document.getElementById("emp").value;
+var action = document.getElementById("action").value;
 
-var canvas=document.createElement("canvas");
-canvas.width=video.videoWidth;
-canvas.height=video.videoHeight;
+var canvas = document.createElement("canvas");
+canvas.width = video.videoWidth;
+canvas.height = video.videoHeight;
 
-var ctx=canvas.getContext("2d");
+var ctx = canvas.getContext("2d");
 ctx.drawImage(video,0,0);
 
-var image=canvas.toDataURL("image/jpeg");
+var image = canvas.toDataURL("image/jpeg");
+
+var formData = new FormData();
+formData.append("emp",emp);
+formData.append("action",action);
+formData.append("image",image);
 
 fetch(scriptURL,{
 method:"POST",
-body:new URLSearchParams({
-emp:emp,
-action:action,
-image:image
-})
+body:formData
 })
 .then(res=>res.text())
 .then(data=>{
 
-document.getElementById("msg").innerHTML=
+document.getElementById("msg").innerHTML =
 "✅ Your attendance successfully submitted";
 
 })
 .catch(err=>{
 
-document.getElementById("msg").innerHTML=
-"❌ Submit failed";
+document.getElementById("msg").innerHTML =
+"❌ Submit Failed";
 
 });
 
