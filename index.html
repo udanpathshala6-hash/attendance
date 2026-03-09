@@ -1,73 +1,70 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 
-<title>Attendance System</title>
+<title>Attendance</title>
 
 <style>
 
 body{
+margin:0;
 font-family:Arial;
-background:#f4f6f9;
+background:#111;
+color:white;
 display:flex;
 justify-content:center;
 align-items:center;
 height:100vh;
 }
 
-.box{
-
-background:white;
-padding:30px;
-width:360px;
-border-radius:10px;
-box-shadow:0 0 15px rgba(0,0,0,0.2);
-
-}
-
-h2{
+.container{
+width:100%;
+max-width:500px;
 text-align:center;
 }
 
-select,button{
-
-width:100%;
-padding:10px;
-margin-top:10px;
+select{
+width:80%;
+padding:12px;
+margin:10px;
+font-size:16px;
 border-radius:6px;
-font-size:15px;
-
-}
-
-button{
-
-background:#2ecc71;
-border:none;
-color:white;
-
 }
 
 video{
-
-width:100%;
-margin-top:10px;
+width:90%;
 border-radius:10px;
-
+margin-top:15px;
 }
 
-#preview{
-
-width:100%;
-margin-top:10px;
-
+button{
+padding:12px 20px;
+margin-top:15px;
+font-size:16px;
+border:none;
+border-radius:6px;
+background:#27ae60;
+color:white;
+cursor:pointer;
 }
 
 .status{
-
 margin-top:10px;
-font-size:14px;
+font-size:16px;
+}
 
+#result{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#111;
+display:none;
+justify-content:center;
+align-items:center;
+text-align:center;
+font-size:32px;
 }
 
 </style>
@@ -76,7 +73,7 @@ font-size:14px;
 
 <body>
 
-<div class="box">
+<div class="container">
 
 <h2>Employee Attendance</h2>
 
@@ -96,58 +93,53 @@ font-size:14px;
 
 </select>
 
+<div class="status" id="locationStatus">
+Checking location...
+</div>
+
 <video id="video" autoplay></video>
 
 <button onclick="capture()">Capture Selfie</button>
 
+<button onclick="submitAttendance()">Submit</button>
+
 <canvas id="canvas" style="display:none"></canvas>
-
-<img id="preview">
-
-<button onclick="submitAttendance()">Submit Attendance</button>
-
-<div class="status" id="status"></div>
 
 </div>
 
+<div id="result"></div>
+
 <script>
 
-const OFFICE_LAT = 23.233491683380457;
-const OFFICE_LON = 87.86578370663831;
+const OFFICE_LAT = 23.233475869351345;
+const OFFICE_LON = 87.86578472386672;
 const RADIUS = 100;
 
-let latitude=null;
-let longitude=null;
 let imageData="";
+let locationValid=false;
 
-const statusText=document.getElementById("status");
+const video=document.getElementById("video");
 
 navigator.mediaDevices.getUserMedia({video:true})
-
 .then(stream=>{
-document.getElementById("video").srcObject=stream;
-statusText.innerHTML="Camera Ready";
-})
-
-.catch(()=>{
-statusText.innerHTML="Camera permission denied";
+video.srcObject=stream;
 });
 
 navigator.geolocation.getCurrentPosition(function(pos){
 
-latitude=pos.coords.latitude;
-longitude=pos.coords.longitude;
+let lat=pos.coords.latitude;
+let lon=pos.coords.longitude;
 
-let dist = getDistance(latitude,longitude,OFFICE_LAT,OFFICE_LON);
+let dist=getDistance(lat,lon,OFFICE_LAT,OFFICE_LON);
 
-if(dist > RADIUS){
+if(dist<RADIUS){
 
-alert("You are outside office location");
-statusText.innerHTML="Location Invalid";
+document.getElementById("locationStatus").innerHTML="Location Approved";
+locationValid=true;
 
 }else{
 
-statusText.innerHTML="Location Verified";
+document.getElementById("locationStatus").innerHTML="Location Invalid";
 
 }
 
@@ -173,7 +165,6 @@ return R*c;
 
 function capture(){
 
-let video=document.getElementById("video");
 let canvas=document.getElementById("canvas");
 
 canvas.width=video.videoWidth;
@@ -183,11 +174,16 @@ canvas.getContext("2d").drawImage(video,0,0);
 
 imageData=canvas.toDataURL("image/png");
 
-document.getElementById("preview").src=imageData;
-
 }
 
 function submitAttendance(){
+
+if(!locationValid){
+
+alert("Location not approved");
+return;
+
+}
 
 if(!imageData){
 
@@ -196,15 +192,15 @@ return;
 
 }
 
-var employee=document.getElementById("employee").value;
-var action=document.getElementById("action").value;
+let employee=document.getElementById("employee").value;
+let action=document.getElementById("action").value;
 
-var now=new Date();
+let now=new Date();
 
-var time=now.toLocaleTimeString();
-var date=now.toISOString().split('T')[0];
+let time=now.toLocaleTimeString();
+let date=now.toISOString().split('T')[0];
 
-fetch("https://script.google.com/macros/s/AKfycbxZGo1168etcOG8aVu8gTT-F7f5WFihF4db2H_4CgOOKJB8UVF24EazZsali8gzF3b4/exec",{
+fetch("https://script.google.com/macros/s/AKfycbyGg3CKPphQFQqgRtY6ukBVA7BjkZrFHP8xjSzilcSAnxihy-5N74a8igmnLBZF1FMi/exec",{
 
 method:"POST",
 
@@ -223,7 +219,19 @@ image:imageData
 .then(res=>res.text())
 .then(data=>{
 
-alert("Attendance Submitted");
+let result=document.getElementById("result");
+
+if(data=="ALREADY"){
+
+result.innerHTML=employee+"<br>Your action is already submitted";
+
+}else{
+
+result.innerHTML=employee+"<br>Your action is submitted";
+
+}
+
+result.style.display="flex";
 
 });
 
