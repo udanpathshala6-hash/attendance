@@ -130,9 +130,9 @@ const officeLat = 23.23347531928216
 const officeLon = 87.8657818187088
 const allowedDistance = 200
 
-let verified=false
-let imageData=""
-let stream=null
+let verified = false
+let imageData = ""
+let stream = null
 
 startCamera()
 
@@ -142,8 +142,8 @@ navigator.mediaDevices.getUserMedia({video:true})
 
 .then(function(s){
 
-stream=s
-document.getElementById("video").srcObject=s
+stream = s
+document.getElementById("video").srcObject = s
 
 })
 
@@ -161,19 +161,19 @@ navigator.geolocation.getCurrentPosition(
 
 function(pos){
 
-let lat=pos.coords.latitude
-let lon=pos.coords.longitude
+let lat = pos.coords.latitude
+let lon = pos.coords.longitude
 
-let distance=getDistance(lat,lon,officeLat,officeLon)
+let distance = getDistance(lat,lon,officeLat,officeLon)
 
-if(distance<allowedDistance){
+if(distance < allowedDistance){
 
-verified=true
-document.getElementById("locStatus").innerHTML="✔ Location Verified"
+verified = true
+document.getElementById("locStatus").innerHTML = "✔ Location Verified"
 
 }else{
 
-document.getElementById("locStatus").innerHTML="❌ Outside Office"
+document.getElementById("locStatus").innerHTML = "❌ Outside Office"
 
 }
 
@@ -191,18 +191,18 @@ alert("Location permission denied")
 
 function getDistance(lat1,lon1,lat2,lon2){
 
-const R=6371
+const R = 6371
 
-const dLat=(lat2-lat1)*Math.PI/180
-const dLon=(lon2-lon1)*Math.PI/180
+const dLat = (lat2-lat1)*Math.PI/180
+const dLon = (lon2-lon1)*Math.PI/180
 
-const a=
-Math.sin(dLat/2)*Math.sin(dLat/2)+
-Math.cos(lat1*Math.PI/180)*
-Math.cos(lat2*Math.PI/180)*
+const a =
+Math.sin(dLat/2)*Math.sin(dLat/2) +
+Math.cos(lat1*Math.PI/180) *
+Math.cos(lat2*Math.PI/180) *
 Math.sin(dLon/2)*Math.sin(dLon/2)
 
-const c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))
+const c = 2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))
 
 return R*c*1000
 
@@ -210,28 +210,28 @@ return R*c*1000
 
 function captureSelfie(){
 
-let video=document.getElementById("video")
+let video = document.getElementById("video")
 
-let canvas=document.createElement("canvas")
+let canvas = document.createElement("canvas")
 
-canvas.width=video.videoWidth
-canvas.height=video.videoHeight
+canvas.width = video.videoWidth
+canvas.height = video.videoHeight
 
 canvas.getContext("2d").drawImage(video,0,0)
 
-imageData=canvas.toDataURL("image/png")
+imageData = canvas.toDataURL("image/png")
 
-document.getElementById("preview").src=imageData
-document.getElementById("preview").style.display="block"
+document.getElementById("preview").src = imageData
+document.getElementById("preview").style.display = "block"
 
-video.style.display="none"
+video.style.display = "none"
 
 }
 
 function submitAttendance(){
 
-let name=document.getElementById("name").value
-let action=document.getElementById("action").value
+let name = document.getElementById("name").value
+let action = document.getElementById("action").value
 
 if(name==""){
 
@@ -261,9 +261,13 @@ return
 
 }
 
-fetch("https://script.google.com/macros/s/AKfycbwWpLrbZjlrFskVrAjS3o23Arwat0o5nzmuWtpOqqBVo1BKkaNpBVbexQumvMGTBfgD/exec",{
+fetch("https://script.google.com/macros/s/AKfycbxaUvEZOXPSPkyz94tE1j4ZHMEvPORzhmLhLGI4g64hs4nNZWIKmC9101kkZ51D6YBY/exec",{
 
 method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
 
 body:JSON.stringify({
 
@@ -275,21 +279,21 @@ image:imageData
 
 })
 
-.then(res=>res.text())
+.then(res => res.text())
 
-.then(res=>{
+.then(res => {
 
-let screen=document.getElementById("resultScreen")
+let screen = document.getElementById("resultScreen")
 
-screen.style.display="flex"
+screen.style.display = "flex"
 
-if(res.toLowerCase().includes("already")){
+if(res.includes("already")){
 
-screen.innerHTML="🚫 Your attendance already submitted"
+screen.innerHTML = "🚫 Your attendance already submitted"
 
 }else{
 
-screen.innerHTML="✅ "+name+"<br>Attendance Successfully Submitted"
+screen.innerHTML = "✅ "+name+"<br>Attendance Successfully Submitted"
 
 }
 
@@ -299,7 +303,7 @@ stopCamera()
 
 .catch(function(){
 
-alert("Submit failed")
+alert("Submit Failed")
 
 })
 
@@ -309,7 +313,7 @@ function stopCamera(){
 
 if(stream){
 
-stream.getTracks().forEach(track=>track.stop())
+stream.getTracks().forEach(track => track.stop())
 
 }
 
