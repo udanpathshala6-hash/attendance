@@ -10,7 +10,7 @@
 
 body{
 font-family:Arial;
-background:#f3f5f7;
+background:#f2f4f7;
 padding:20px;
 }
 
@@ -42,7 +42,7 @@ border:none;
 
 video{
 width:100%;
-border-radius:6px;
+border-radius:8px;
 margin-top:10px;
 }
 
@@ -56,11 +56,49 @@ text-align:center;
 font-weight:bold;
 }
 
+.popup{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.6);
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.popup-box{
+background:white;
+padding:25px;
+border-radius:10px;
+text-align:center;
+width:300px;
+}
+
 </style>
 
 </head>
 
 <body>
+
+<div id="permissionPopup" class="popup">
+
+<div class="popup-box">
+
+<h3>Permission Required</h3>
+
+<p>
+Allow Camera & Location to mark attendance
+</p>
+
+<button onclick="requestPermissions()">
+Allow Permissions
+</button>
+
+</div>
+
+</div>
 
 <div class="container">
 
@@ -88,9 +126,11 @@ font-weight:bold;
 
 <button onclick="verifyLocation()">📍 Verify Location</button>
 
-<div id="locStatus" class="status">Location Not Verified</div>
+<div id="locStatus" class="status">
+Location Not Verified
+</div>
 
-<video id="video" autoplay></video>
+<video id="video" autoplay playsinline></video>
 
 <button onclick="capture()">📷 Capture Selfie</button>
 
@@ -106,17 +146,39 @@ Submit Attendance
 
 <script>
 
-const officeLat=23.233475765718378,
-const officeLon=87.86577936779346
-const allowedDistance=150
+const officeLat = 23.233469745356075,
+const officeLon = 87.86578447068129
+const allowedDistance = 150
 
-let verified=false
 let imageData=""
+let verified=false
 
-navigator.mediaDevices.getUserMedia({video:true})
-.then(stream=>{
-document.getElementById("video").srcObject=stream
+function requestPermissions(){
+
+navigator.mediaDevices.getUserMedia({
+video:true,
+audio:false
 })
+.then(function(stream){
+
+document.getElementById("video").srcObject = stream
+
+document.getElementById("permissionPopup").style.display="none"
+
+})
+.catch(function(){
+
+alert("Camera permission denied")
+
+})
+
+navigator.geolocation.getCurrentPosition(
+function(){},
+function(){
+alert("Location permission denied")
+})
+
+}
 
 function getDistance(lat1,lon1,lat2,lon2){
 
@@ -139,7 +201,9 @@ return R*c*1000
 
 function verifyLocation(){
 
-navigator.geolocation.getCurrentPosition(function(pos){
+navigator.geolocation.getCurrentPosition(
+
+function(pos){
 
 let lat=pos.coords.latitude
 let lon=pos.coords.longitude
@@ -161,6 +225,12 @@ document.getElementById("locStatus").innerHTML=
 "❌ Outside Office"
 
 }
+
+},
+
+function(){
+
+alert("Location access denied")
 
 })
 
@@ -195,6 +265,14 @@ return
 
 }
 
+if(!verified){
+
+alert("Verify location first")
+
+return
+
+}
+
 if(imageData==""){
 
 alert("Capture selfie first")
@@ -209,7 +287,7 @@ action:action,
 image:imageData
 }
 
-fetch("https://script.google.com/macros/s/AKfycbzUAuJH2UR3gS5p7E_mfRDXwoHUAnP69rcGWmQfOHoKF_soaJw0P3N2br6SgSqa4mn2/exec",{
+fetch("https://script.google.com/macros/s/AKfycbyCLoooLczP-Z3ItSwdPTvEugjWKRhh7U7KYommitnd8rWotdlHU4pOYDmaQwW_dP-W/exec",{
 
 method:"POST",
 body:JSON.stringify(data)
