@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
-<title>Attendance</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Attendance System</title>
 
 <style>
 
 body{
 margin:0;
 font-family:Arial;
-background:#111;
+background:#0f172a;
 color:white;
 display:flex;
 justify-content:center;
@@ -18,53 +21,79 @@ height:100vh;
 }
 
 .container{
+
 width:100%;
-max-width:500px;
+max-width:420px;
 text-align:center;
+padding:20px;
+
+}
+
+h2{
+margin-bottom:15px;
 }
 
 select{
-width:80%;
+
+width:100%;
 padding:12px;
-margin:10px;
+margin-top:10px;
+border-radius:8px;
 font-size:16px;
-border-radius:6px;
+border:none;
+
 }
 
 video{
-width:90%;
-border-radius:10px;
+
+width:100%;
 margin-top:15px;
+border-radius:12px;
+
 }
 
 button{
-padding:12px 20px;
+
+width:100%;
+padding:14px;
 margin-top:15px;
-font-size:16px;
+border-radius:10px;
 border:none;
-border-radius:6px;
-background:#27ae60;
+background:#22c55e;
 color:white;
+font-size:16px;
 cursor:pointer;
+
+}
+
+button:hover{
+
+background:#16a34a;
+
 }
 
 .status{
-margin-top:10px;
-font-size:16px;
+
+margin-top:12px;
+font-size:15px;
+
 }
 
 #result{
+
 position:fixed;
 top:0;
 left:0;
 width:100%;
 height:100%;
-background:#111;
+background:#0f172a;
 display:none;
 justify-content:center;
 align-items:center;
 text-align:center;
-font-size:32px;
+font-size:28px;
+padding:20px;
+
 }
 
 </style>
@@ -97,11 +126,11 @@ font-size:32px;
 Checking location...
 </div>
 
-<video id="video" autoplay></video>
+<video id="video" autoplay playsinline></video>
 
 <button onclick="capture()">Capture Selfie</button>
 
-<button onclick="submitAttendance()">Submit</button>
+<button onclick="submitAttendance()">Submit Attendance</button>
 
 <canvas id="canvas" style="display:none"></canvas>
 
@@ -111,19 +140,31 @@ Checking location...
 
 <script>
 
-const OFFICE_LAT = 23.233475869351345;
-const OFFICE_LON = 87.86578472386672;
+const OFFICE_LAT = 23.233639618888493;
+const OFFICE_LON = 87.86573843314055;
 const RADIUS = 100;
 
 let imageData="";
-let locationValid=false;
+let locationApproved=false;
 
 const video=document.getElementById("video");
 
-navigator.mediaDevices.getUserMedia({video:true})
-.then(stream=>{
+navigator.mediaDevices.getUserMedia({
+video:{facingMode:"user"}
+})
+
+.then(function(stream){
+
 video.srcObject=stream;
+
+})
+
+.catch(function(){
+
+alert("Camera permission denied");
+
 });
+
 
 navigator.geolocation.getCurrentPosition(function(pos){
 
@@ -135,7 +176,7 @@ let dist=getDistance(lat,lon,OFFICE_LAT,OFFICE_LON);
 if(dist<RADIUS){
 
 document.getElementById("locationStatus").innerHTML="Location Approved";
-locationValid=true;
+locationApproved=true;
 
 }else{
 
@@ -144,6 +185,7 @@ document.getElementById("locationStatus").innerHTML="Location Invalid";
 }
 
 });
+
 
 function getDistance(lat1,lon1,lat2,lon2){
 
@@ -163,9 +205,10 @@ return R*c;
 
 }
 
+
 function capture(){
 
-let canvas=document.getElementById("canvas");
+const canvas=document.getElementById("canvas");
 
 canvas.width=video.videoWidth;
 canvas.height=video.videoHeight;
@@ -174,11 +217,14 @@ canvas.getContext("2d").drawImage(video,0,0);
 
 imageData=canvas.toDataURL("image/png");
 
+alert("Selfie captured");
+
 }
+
 
 function submitAttendance(){
 
-if(!locationValid){
+if(!locationApproved){
 
 alert("Location not approved");
 return;
@@ -200,7 +246,7 @@ let now=new Date();
 let time=now.toLocaleTimeString();
 let date=now.toISOString().split('T')[0];
 
-fetch("https://script.google.com/macros/s/AKfycbyGg3CKPphQFQqgRtY6ukBVA7BjkZrFHP8xjSzilcSAnxihy-5N74a8igmnLBZF1FMi/exec",{
+fetch("https://script.google.com/macros/s/AKfycbz5Db3EBpmrBj8el7ArjDFKrYPw9lALOJ0TvABrWMuWuifMGoETlhBgb1H8p6tApx5K/exec",{
 
 method:"POST",
 
@@ -240,5 +286,4 @@ result.style.display="flex";
 </script>
 
 </body>
-
 </html>
