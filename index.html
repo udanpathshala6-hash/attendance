@@ -1,32 +1,38 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Employee Attendance</title>
+<title>Attendance System</title>
 
 <style>
 
 body{
 margin:0;
-font-family:Arial;
-background:#0f172a;
-color:white;
+font-family:Segoe UI, sans-serif;
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
-height:100vh;
+color:white;
 }
 
-.container{
+.card{
 
-width:100%;
+width:95%;
 max-width:420px;
+background:#111;
+border-radius:15px;
 padding:20px;
+box-shadow:0 10px 30px rgba(0,0,0,0.5);
 text-align:center;
 
+}
+
+h2{
+margin-top:5px;
 }
 
 select{
@@ -36,44 +42,37 @@ padding:12px;
 margin-top:10px;
 border-radius:8px;
 border:none;
-font-size:16px;
+font-size:15px;
+background:#1f2937;
+color:white;
 
 }
 
 video{
-
-width:100%;
-margin-top:15px;
-border-radius:10px;
-
+width:220px;
+height:220px;
+margin:15px auto;
+border-radius:50%;
+border:4px solid #22c55e;
+display:block;
+object-fit:cover;
+box-shadow:0 0 20px rgba(0,0,0,0.6);
 }
 
 #preview{
-
-width:100%;
-margin-top:10px;
-border-radius:10px;
+width:160px;
+height:160px;
+margin:15px auto;
+border-radius:50%;
+border:4px solid #22c55e;
 display:none;
-
+object-fit:cover;
 }
+  @keyframes zoomIn{
 
-button{
+0%{transform:scale(0.5);opacity:0;}
 
-width:100%;
-padding:14px;
-margin-top:15px;
-border-radius:10px;
-border:none;
-background:#22c55e;
-color:white;
-font-size:16px;
-cursor:pointer;
-
-}
-
-.status{
-
-margin-top:10px;
+100%{transform:scale(1);opacity:1;}
 
 }
 
@@ -84,13 +83,55 @@ top:0;
 left:0;
 width:100%;
 height:100%;
-background:#0f172a;
+background:#000;
 display:none;
 justify-content:center;
 align-items:center;
 text-align:center;
 font-size:30px;
-padding:20px;
+animation:zoomIn 0.5s ease;
+
+}
+button{
+
+width:100%;
+padding:14px;
+margin-top:12px;
+border:none;
+border-radius:10px;
+font-size:16px;
+background:#22c55e;
+color:white;
+cursor:pointer;
+
+}
+
+button:hover{
+
+background:#16a34a;
+
+}
+
+.status{
+
+margin-top:8px;
+font-size:14px;
+
+}
+
+#result{
+
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#000;
+display:none;
+justify-content:center;
+align-items:center;
+text-align:center;
+font-size:28px;
 
 }
 
@@ -100,15 +141,16 @@ padding:20px;
 
 <body>
 
-<div class="container">
+<div class="card">
 
 <h2>Employee Attendance</h2>
 
 <select id="employee">
 
 <option>Sagar Bala</option>
+<option>Dipan</option>
+<option>Jhuma</option>
 <option>Nikunja Ghosh</option>
-
 </select>
 
 <select id="action">
@@ -120,10 +162,8 @@ padding:20px;
 
 </select>
 
-<div class="status" id="locationStatus">
-
+<div id="locationStatus" class="status">
 Checking location...
-
 </div>
 
 <video id="video" autoplay playsinline></video>
@@ -142,9 +182,9 @@ Checking location...
 
 <script>
 
-const OFFICE_LAT = 23.2334625;
-const OFFICE_LON = 87.8657838;
-const RADIUS = 300;
+const OFFICE_LAT = 23.233464916200468;
+const OFFICE_LON = 87.86576908748658;
+const RADIUS = 100;
 
 let imageData="";
 let locationApproved=false;
@@ -156,9 +196,6 @@ video:{facingMode:"user"}
 })
 .then(stream=>{
 video.srcObject=stream;
-})
-.catch(()=>{
-alert("Camera permission denied");
 });
 
 navigator.geolocation.getCurrentPosition(function(pos){
@@ -241,7 +278,7 @@ let now=new Date();
 let time=now.toLocaleTimeString();
 let date=now.toISOString().split('T')[0];
 
-fetch("https://script.google.com/macros/s/AKfycbzJDZMIysOPHh0iaFPoQNsjFHlkdk67AopfQ6wyjh3oLt7fIjfkrSikONzq4ib40Aqa/exec",{
+fetch("https://script.google.com/macros/s/AKfycbwURLQoZSOQfHwEVOPR9oKAQVB9uEHLDSfQVvFi_u0gf_ZByOhZppm0evOy-HofV3dV/exec",{
 
 method:"POST",
 
@@ -261,15 +298,28 @@ image:imageData
 .then(data=>{
 
 let result=document.getElementById("result");
+if(data.trim()=="NAME_ERROR"){
 
+result.innerHTML=
+"❌ Name does not match";
+
+}
+  if(data.trim()=="ENTRY_REQUIRED"){
+
+result.innerHTML="⚠ First action must be Entry";
+
+}
 if(data.trim()=="ALREADY"){
 
-result.innerHTML=employee+"<br>Your action is already submitted";
+result.innerHTML=employee+"<br>⚠ Attendance Already Submitted";
 
 }else{
 
-result.innerHTML=employee+"<br>Your action is submitted";
-
+result.innerHTML=
+"✅ Attendance Recorded"+
+"<br><br>Employee: "+employee+
+"<br>Action: "+action+
+"<br>Time: "+time;
 }
 
 result.style.display="flex";
