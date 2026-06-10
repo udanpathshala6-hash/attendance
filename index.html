@@ -1,333 +1,408 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>Attendance System</title>
-
-<style>
-
-body{
-margin:0;
-font-family:Segoe UI, sans-serif;
-background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-color:white;
-}
-
-.card{
-
-width:95%;
-max-width:420px;
-background:#111;
-border-radius:15px;
-padding:20px;
-box-shadow:0 10px 30px rgba(0,0,0,0.5);
-text-align:center;
-
-}
-
-h2{
-margin-top:5px;
-}
-
-select{
-
-width:100%;
-padding:12px;
-margin-top:10px;
-border-radius:8px;
-border:none;
-font-size:15px;
-background:#1f2937;
-color:white;
-
-}
-
-video{
-width:220px;
-height:220px;
-margin:15px auto;
-border-radius:50%;
-border:4px solid #22c55e;
-display:block;
-object-fit:cover;
-box-shadow:0 0 20px rgba(0,0,0,0.6);
-}
-
-#preview{
-width:160px;
-height:160px;
-margin:15px auto;
-border-radius:50%;
-border:4px solid #22c55e;
-display:none;
-object-fit:cover;
-}
-  @keyframes zoomIn{
-
-0%{transform:scale(0.5);opacity:0;}
-
-100%{transform:scale(1);opacity:1;}
-
-}
-
-#result{
-
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:#000;
-display:none;
-justify-content:center;
-align-items:center;
-text-align:center;
-font-size:30px;
-animation:zoomIn 0.5s ease;
-
-}
-button{
-
-width:100%;
-padding:14px;
-margin-top:12px;
-border:none;
-border-radius:10px;
-font-size:16px;
-background:#22c55e;
-color:white;
-cursor:pointer;
-
-}
-
-button:hover{
-
-background:#16a34a;
-
-}
-
-.status{
-
-margin-top:8px;
-font-size:14px;
-
-}
-
-#result{
-
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:#000;
-display:none;
-justify-content:center;
-align-items:center;
-text-align:center;
-font-size:28px;
-
-}
-
-</style>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendly • Office</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #22c55e;
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .card {
+            background: #1e2937;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+            overflow: hidden;
+            width: 100%;
+            max-width: 440px;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        
+        .header {
+            background: linear-gradient(to right, #166534, #4ade80);
+            padding: 1.5rem;
+            text-align: center;
+            color: white;
+        }
+        
+        video {
+            width: 260px;
+            height: 260px;
+            border-radius: 9999px;
+            border: 6px solid #22c55e;
+            box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.15);
+            object-fit: cover;
+        }
+        
+        #preview {
+            width: 260px;
+            height: 260px;
+            border-radius: 9999px;
+            border: 6px solid #22c55e;
+            box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.15);
+            object-fit: cover;
+        }
+        
+        .select-wrapper {
+            position: relative;
+        }
+        
+        .select-wrapper i {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            pointer-events: none;
+        }
+        
+        button {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .capture-btn {
+            background: linear-gradient(to right, #22c55e, #4ade80);
+        }
+        
+        #result {
+            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.6); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .status-dot {
+            animation: pulse 2s infinite;
+        }
+    </style>
 </head>
-
-<body>
-
-<div class="card">
-
-<h2>Employee Attendance</h2>
-
-<select id="employee">
-<option>Select Name</option>
-<option>Sagar Bala</option>
-<option>Dipan</option>
-<option>Jhuma Das</option>
-<option>Nikunja Ghosh</option>
-</select>
-
-<select id="action">
-
-<option>Entry</option>
-<option>Tiffin Exit</option>
-<option>Tiffin Entry</option>
-<option>Exit</option>
-
-</select>
-
-<div id="locationStatus" class="status">
-Checking location...
-</div>
-
-<video id="video" autoplay playsinline></video>
-
-<img id="preview">
-
-<button onclick="capture()">Capture Selfie</button>
-
-<button onclick="submitAttendance()">Submit Attendance</button>
-
-<canvas id="canvas" style="display:none"></canvas>
-
-</div>
-
-<div id="result"></div>
-
-<script>
-
-const OFFICE_LAT = 23.233464916200468;
-const OFFICE_LON = 87.86576908748658;
-const RADIUS = 100;
-
-let imageData="";
-let locationApproved=false;
-
-const video=document.getElementById("video");
-
-navigator.mediaDevices.getUserMedia({
-video:{facingMode:"user"}
-})
-.then(stream=>{
-video.srcObject=stream;
-});
-
-navigator.geolocation.getCurrentPosition(function(pos){
-
-let lat=pos.coords.latitude;
-let lon=pos.coords.longitude;
-
-let dist=getDistance(lat,lon,OFFICE_LAT,OFFICE_LON);
-
-if(dist<RADIUS){
-
-document.getElementById("locationStatus").innerHTML="Location Approved";
-locationApproved=true;
-
-}else{
-
-document.getElementById("locationStatus").innerHTML="Location Invalid";
-
-}
-
-});
-
-function getDistance(lat1,lon1,lat2,lon2){
-
-var R=6371000;
-
-var dLat=(lat2-lat1)*Math.PI/180;
-var dLon=(lon2-lon1)*Math.PI/180;
-
-var a=
-Math.sin(dLat/2)*Math.sin(dLat/2)+
-Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
-Math.sin(dLon/2)*Math.sin(dLon/2);
-
-var c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-
-return R*c;
-
-}
-
-function capture(){
-
-const canvas=document.getElementById("canvas");
-
-canvas.width=video.videoWidth;
-canvas.height=video.videoHeight;
-
-canvas.getContext("2d").drawImage(video,0,0);
-
-imageData=canvas.toDataURL("image/png");
-
-let preview=document.getElementById("preview");
-
-preview.src=imageData;
-preview.style.display="block";
-
-}
-
-function submitAttendance(){
-
-if(!locationApproved){
-
-alert("Location not approved");
-return;
-
-}
-
-if(!imageData){
-
-alert("Capture selfie first");
-return;
-
-}
-
-let employee=document.getElementById("employee").value;
-let action=document.getElementById("action").value;
-
-let now=new Date();
-
-let time=now.toLocaleTimeString();
-let date=now.toISOString().split('T')[0];
-
-fetch("https://script.google.com/macros/s/AKfycbxJlwgrx-4zaLdKxbRUyMuNuZJxjfE6MmRqNo9X3Hu806HOCTUKefqBPlMst_K-L-Q-/exec",{
-
-method:"POST",
-
-body:new URLSearchParams({
-
-employee:employee,
-action:action,
-time:time,
-date:date,
-image:imageData
-
-})
-
-})
-
-.then(res=>res.text())
-.then(data=>{
-
-let result=document.getElementById("result");
-if(data.trim()=="NAME_ERROR"){
-
-result.innerHTML=
-"❌ Name does not match";
-
-}
-  if(data.trim()=="ENTRY_REQUIRED"){
-
-result.innerHTML="⚠ First action must be Entry";
-
-}
-if(data.trim()=="ALREADY"){
-
-result.innerHTML=employee+"<br>⚠ Attendance Already Submitted";
-
-}else{
-
-result.innerHTML=
-"✅ Attendance Recorded"+
-"<br><br>Employee: "+employee+
-"<br>Action: "+action+
-"<br>Time: "+time;
-}
-
-result.style.display="flex";
-
-});
-
-}
-
-</script>
-
+<body class="p-4">
+    <div class="card">
+        <!-- Header -->
+        <div class="header">
+            <div class="flex items-center justify-center gap-3">
+                <i class="fa-solid fa-fingerprint text-3xl"></i>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight">Attendly</h1>
+                    <p class="text-xs opacity-75">Office Attendance</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-8">
+            <!-- Status -->
+            <div id="locationStatus" class="flex items-center gap-2 text-sm mb-6 px-4 py-3 bg-slate-800 rounded-2xl">
+                <i id="statusIcon" class="fa-solid fa-location-dot text-yellow-400"></i>
+                <span id="statusText" class="font-medium">Checking location...</span>
+            </div>
+            
+            <!-- Employee -->
+            <div class="mb-6">
+                <label class="block text-xs font-semibold tracking-widest text-slate-400 mb-2">EMPLOYEE</label>
+                <div class="select-wrapper">
+                    <select id="employee" class="w-full bg-slate-800 text-white border border-slate-700 rounded-2xl px-5 py-4 text-lg focus:outline-none focus:border-emerald-500 transition-colors">
+                        <option value="">Select Name</option>
+                        <option value="Sagar Bala">Sagar Bala</option>
+                        <option value="Dipan">Dipan</option>
+                        <option value="Jhuma Das">Jhuma Das</option>
+                        <option value="Nikunja Ghosh">Nikunja Ghosh</option>
+                    </select>
+                    <i class="fa-solid fa-user"></i>
+                </div>
+            </div>
+            
+            <!-- Action -->
+            <div class="mb-8">
+                <label class="block text-xs font-semibold tracking-widest text-slate-400 mb-2">ACTION</label>
+                <div class="select-wrapper">
+                    <select id="action" class="w-full bg-slate-800 text-white border border-slate-700 rounded-2xl px-5 py-4 text-lg focus:outline-none focus:border-emerald-500 transition-colors">
+                        <option value="Entry">Entry</option>
+                        <option value="Tiffin Exit">Tiffin Exit</option>
+                        <option value="Tiffin Entry">Tiffin Entry</option>
+                        <option value="Exit">Exit</option>
+                    </select>
+                    <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                </div>
+            </div>
+            
+            <!-- Camera -->
+            <div class="flex flex-col items-center mb-8">
+                <div class="relative">
+                    <video id="video" autoplay playsinline class="mx-auto"></video>
+                    <img id="preview" class="hidden mx-auto">
+                    
+                    <!-- Camera overlay -->
+                    <div class="absolute inset-0 border-2 border-white/30 rounded-full pointer-events-none"></div>
+                </div>
+                <p class="text-xs text-slate-400 mt-3 flex items-center gap-1">
+                    <i class="fa-solid fa-camera"></i>
+                    <span>Take Selfie</span>
+                </p>
+            </div>
+            
+            <!-- Buttons -->
+            <div class="space-y-4">
+                <button onclick="capture()" 
+                        class="capture-btn w-full py-4 rounded-2xl text-white font-semibold text-lg flex items-center justify-center gap-3 shadow-lg shadow-emerald-500/30">
+                    <i class="fa-solid fa-camera"></i>
+                    CAPTURE SELFIE
+                </button>
+                
+                <button onclick="submitAttendance()" 
+                        class="w-full bg-white text-slate-900 py-4 rounded-2xl font-semibold text-lg flex items-center justify-center gap-3 hover:bg-slate-100">
+                    <i class="fa-solid fa-check"></i>
+                    SUBMIT ATTENDANCE
+                </button>
+            </div>
+        </div>
+        
+        <div class="px-8 py-6 border-t border-slate-700 text-center text-xs text-slate-500">
+            <i class="fa-solid fa-shield-halved"></i> Secure • Location Verified
+        </div>
+    </div>
+    
+    <!-- Result Overlay -->
+    <div id="result" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center z-50">
+        <div class="text-center max-w-xs px-8">
+            <div id="resultIcon" class="text-8xl mb-6"></div>
+            <h2 id="resultTitle" class="text-3xl font-bold mb-2"></h2>
+            <p id="resultDetails" class="text-slate-300 text-lg leading-relaxed"></p>
+            
+            <button onclick="resetUI()" 
+                    class="mt-10 bg-white text-black px-10 py-3.5 rounded-2xl font-semibold text-lg">
+                Done
+            </button>
+        </div>
+    </div>
+    
+    <canvas id="canvas" class="hidden"></canvas>
+    
+    <script>
+        const OFFICE_LAT = 23.233464916200468;
+        const OFFICE_LON = 87.86576908748658;
+        const RADIUS = 100;
+        
+        let imageData = "";
+        let locationApproved = false;
+        let currentStream = null;
+        
+        const video = document.getElementById("video");
+        const preview = document.getElementById("preview");
+        const locationStatus = document.getElementById("locationStatus");
+        const statusText = document.getElementById("statusText");
+        const statusIcon = document.getElementById("statusIcon");
+        
+        // Initialize Camera
+        async function initCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        facingMode: "user",
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                });
+                currentStream = stream;
+                video.srcObject = stream;
+            } catch (err) {
+                console.error("Camera error:", err);
+                alert("Unable to access camera. Please allow camera permission.");
+            }
+        }
+        
+        // Location Check
+        function checkLocation() {
+            if (!navigator.geolocation) {
+                statusText.textContent = "Geolocation not supported";
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+                    const dist = getDistance(lat, lon, OFFICE_LAT, OFFICE_LON);
+                    
+                    if (dist < RADIUS) {
+                        locationApproved = true;
+                        statusText.textContent = "Location Approved ✓";
+                        statusIcon.className = "fa-solid fa-location-dot text-emerald-400";
+                        locationStatus.classList.add("bg-emerald-900/30", "border", "border-emerald-400/30");
+                    } else {
+                        statusText.textContent = "Outside Office Radius";
+                        statusIcon.className = "fa-solid fa-circle-exclamation text-red-400";
+                    }
+                },
+                () => {
+                    statusText.textContent = "Location access denied";
+                    statusIcon.className = "fa-solid fa-circle-exclamation text-red-400";
+                }
+            );
+        }
+        
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371000;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+        
+        function capture() {
+            const canvas = document.getElementById("canvas");
+            canvas.width = video.videoWidth || 720;
+            canvas.height = video.videoHeight || 720;
+            
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            imageData = canvas.toDataURL("image/jpeg", 0.35);
+            
+            preview.src = imageData;
+            preview.classList.remove("hidden");
+            video.classList.add("hidden");
+            
+            // Brief flash effect
+            const flash = document.createElement("div");
+            flash.style.cssText = "position:absolute;inset:0;background:white;opacity:0.6;border-radius:9999px;pointer-events:none;";
+            preview.parentElement.appendChild(flash);
+            setTimeout(() => flash.remove(), 180);
+        }
+        
+        async function submitAttendance() {
+            if (!locationApproved) {
+                alert("❌ Please ensure you are within office premises");
+                return;
+            }
+            
+            if (!imageData) {
+                alert("Please capture your selfie first");
+                return;
+            }
+            
+            const employee = document.getElementById("employee").value;
+            const action = document.getElementById("action").value;
+            
+            if (!employee) {
+                alert("Please select your name");
+                return;
+            }
+            
+            const now = new Date();
+            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' second: '2-digit'});
+            const date = now.toISOString().split('T')[0];
+            
+            try {
+                const res = await fetch("https://script.google.com/macros/s/AKfycbxJlwgrx-4zaLdKxbRUyMuNuZJxjfE6MmRqNo9X3Hu806HOCTUKefqBPlMst_K-L-Q-/exec", {
+                    method: "POST",
+                    body: new URLSearchParams({
+                        employee,
+                        action,
+                        time,
+                        date,
+                        image: imageData
+                    })
+                });
+                
+                const data = await res.text();
+                showResult(data.trim(), employee, action, time);
+            } catch (err) {
+                console.error(err);
+                showResult("ERROR", employee, action, time);
+            }
+        }
+        
+        function showResult(response, employee, action, time) {
+            const resultDiv = document.getElementById("result");
+            const resultIcon = document.getElementById("resultIcon");
+            const resultTitle = document.getElementById("resultTitle");
+            const resultDetails = document.getElementById("resultDetails");
+            
+            resultDiv.classList.remove("hidden");
+            resultDiv.classList.add("flex");
+            
+            if (response === "NAME_ERROR") {
+                resultIcon.innerHTML = '❌';
+                resultIcon.style.color = '#ef4444';
+                resultTitle.textContent = "Name Error";
+                resultTitle.style.color = '#ef4444';
+                resultDetails.textContent = "Selected name does not match records.";
+            } 
+            else if (response === "ENTRY_REQUIRED") {
+                resultIcon.innerHTML = '⚠️';
+                resultIcon.style.color = '#f59e0b';
+                resultTitle.textContent = "Action Order";
+                resultTitle.style.color = '#f59e0b';
+                resultDetails.textContent = "First action must be Entry.";
+            } 
+            else if (response === "ALREADY") {
+                resultIcon.innerHTML = '⚠️';
+                resultIcon.style.color = '#eab308';
+                resultTitle.textContent = "Already Recorded";
+                resultTitle.style.color = '#eab308';
+                resultDetails.innerHTML = `${employee}<br>Attendance already submitted today.`;
+            } 
+            else {
+                // Success
+                resultIcon.innerHTML = '✅';
+                resultIcon.style.color = '#22c55e';
+                resultTitle.textContent = "Success!";
+                resultTitle.style.color = '#22c55e';
+                resultDetails.innerHTML = `
+                    <strong>${employee}</strong><br>
+                    ${action}<br>
+                    ${time}
+                `;
+            }
+        }
+        
+        function resetUI() {
+            const resultDiv = document.getElementById("result");
+            resultDiv.classList.add("hidden");
+            resultDiv.classList.remove("flex");
+            
+            // Reset preview
+            preview.classList.add("hidden");
+            video.classList.remove("hidden");
+            imageData = "";
+        }
+        
+        // Initialize everything
+        window.onload = () => {
+            initCamera();
+            checkLocation();
+            
+            // Tailwind script already loaded
+        };
+        
+        // Cleanup camera on page unload
+        window.addEventListener('beforeunload', () => {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+        });
+    </script>
 </body>
 </html>
