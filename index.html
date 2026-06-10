@@ -370,15 +370,36 @@
             } 
             else {
                 // Success
-                resultIcon.innerHTML = '✅';
-                resultIcon.style.color = '#22c55e';
-                resultTitle.textContent = "Success!";
-                resultTitle.style.color = '#22c55e';
-                resultDetails.innerHTML = `
-                    <strong>${employee}</strong><br>
-                    ${action}<br>
-                    ${time}
-                `;
+                let hour = new Date().getHours();
+let greeting = "";
+
+if(hour >= 5 && hour < 12){
+    greeting = "🌅 Good Morning";
+}
+else if(hour >= 12 && hour < 15){
+    greeting = "☀️ Good Noon";
+}
+else if(hour >= 15 && hour < 18){
+    greeting = "🌇 Good Afternoon";
+}
+else if(hour >= 18 && hour < 22){
+    greeting = "🌆 Good Evening";
+}
+else{
+    greeting = "🌙 Good Night";
+}
+
+resultIcon.innerHTML = '✅';
+resultIcon.style.color = '#22c55e';
+
+resultTitle.textContent = greeting;
+resultTitle.style.color = '#22c55e';
+
+resultDetails.innerHTML = `
+Mr. <strong>${employee}</strong><br><br>
+Your <strong>${action}</strong> has been submitted successfully at <br><br>
+🕒 ${time}
+`;
             }
         }
         
